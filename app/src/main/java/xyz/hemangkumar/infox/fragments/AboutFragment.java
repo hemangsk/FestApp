@@ -1,6 +1,8 @@
 package xyz.hemangkumar.infox.fragments;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -74,9 +76,58 @@ public class AboutFragment extends Fragment {
         recyclerView.setHasFixedSize(true);
 
         recyclerView.addItemDecoration(new MaterialViewPagerHeaderDecorator());
+        Context ctx = getActivity();
+        Log.e("ResultValue ", "Here");
+        SharedPreferences sharedPreferences = ctx.getSharedPreferences("Source", Context.MODE_PRIVATE);
+        String res= "";
+                res = sharedPreferences.getString("Events", "");
+        Log.e("ResultValue ", res.toString());
+        Log.e("ResultValue ", "And");
+        if(res.equals("")){
+            Log.e("Res is null", "Yo");
+            final String url = "https://raw.githubusercontent.com/hemangsk/json_endpoints/master/test.json";
+            new AsyncHttpTask().execute(url);
+        }
 
-        final String url = "https://raw.githubusercontent.com/hemangsk/json_endpoints/master/test.json";
-        new AsyncHttpTask().execute(url);
+        else{
+            try {
+                Log.e("Res is not null, ", String.valueOf(res.length()));
+
+        Log.e("Now", res.toString());
+
+               JSONArray jsonArray = new JSONArray(res);
+                Log.e("CEHC", jsonArray.toString());
+                ArrayList<Event> events = Event.fromJson(jsonArray, new ArrayList<Event>());
+
+                Event.setData(events);
+
+
+
+
+
+
+
+
+                eventAdapter = new EventAdapter(getActivity(), events);
+                eventAdapter.setOnItemClickListener(new EventAdapter.ClickListener() {
+                    @Override
+                    public void onItemClick(int position, View v) {
+                        Intent intent = new Intent(getActivity(), EventActivity.class);
+                        intent.putExtra("POS", position);
+                        startActivity(intent);
+                    }
+
+                    @Override
+                    public void onItemLongClick(int position, View v) {
+
+                    }
+                });
+                recyclerView.setAdapter(eventAdapter);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
 
 
 
@@ -115,7 +166,7 @@ public class AboutFragment extends Fragment {
                     result = 0; //"Failed to fetch data!";
                 }
             } catch (Exception e) {
-                Log.d("ER", e.getLocalizedMessage());
+               e.printStackTrace();
             }
             return res; //"Failed to fetch data!";
         }
@@ -124,15 +175,27 @@ public class AboutFragment extends Fragment {
         protected void onPostExecute(String s) {
             // Download complete. Let us update UI
             Log.e("RESULT", String.valueOf(s.length()));
+
             JSONArray jsonArray = null;
             try {
                 s = s.replace("\\\"", "\"");
+                Context ctx = getActivity();
+                SharedPreferences sharedPreferences = ctx.getSharedPreferences("Source", Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                Log.e("Putting", String.valueOf(s.length()));
+                editor.putString("Events",s);
+                editor.commit();
+
                 Log.e("CHECK", s);
                 jsonArray = new JSONArray(s);
                 Log.e("CEHC", jsonArray.toString());
                 ArrayList<Event> events = Event.fromJson(jsonArray, new ArrayList<Event>());
 
                 Event.setData(events);
+
+
+
+
 
 
 
