@@ -1,3 +1,5 @@
 # FestApp
-Native Android application for College Fests using GitHub hosted JSON endpoint
-![](/app/screenshots/Unknown.png)
+
+<img align="center"
+src = "/app/screenshots/Unknown.png"
+</img>
